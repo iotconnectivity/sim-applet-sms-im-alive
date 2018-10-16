@@ -14,6 +14,8 @@ JavaCard SIM card applet to deliver an SMS very the first time the SIM registers
 
 GSM SIM cards can realize about the status of network regitration (see ["Location Status" ETSII TS 102.223](https://www.etsi.org/deliver/etsi_ts/102200_102299/102223/12.01.00_60/ts_102223v120100p.pdf). What a SIM cannot realize is whether the data connection has been correctly acquired or not). This projects aim to deliver a "hello-im-alive" heart-beat-kind message to a remote server with the content of a Location Status message.
 
+This version sends a hardcoded sms to an example destination address. You should code the desired destination address following the instructions in the source code.
+
 
 ## ToDo
 

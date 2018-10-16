@@ -35,7 +35,7 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 	private byte[] tpdu;
 
     // SMS constants
-    private static final byte[] 	ALPHA_ID_MESSAGE =		{'H','e','l','l','o',' ',' ','W','o','r','l','d'};
+    private static final byte[] 	ALPHA_ID_MESSAGE =		{'H','e','l','l','o',' ',' ','W','o','r','l','d'}; // optional
 
 
 /*
@@ -43,16 +43,16 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 														(byte)0xFF,
 														(byte)0x0C,
 														(byte)0x91,
-														(byte)0x44,(byte)0x97,(byte)0x73,(byte)0x85,(byte)0x88,(byte)0x13,
+														(byte)0x44,(byte)0x10,(byte)0x32,(byte)0x54,(byte)0x76,(byte)0x98, //440123456789 The phone number in semi octets (441032547698).
 														(byte)0x00,
 														(byte)0x04};	
 */																							
 
 	private static final byte[]		HARDCODED_TPDU	= {	(byte)0x01,
 														(byte)0xFF,
-														(byte)0x0C,
+														(byte)0x0C, //length of address 
 														(byte)0x91,
-														(byte)0x44,(byte)0x97,(byte)0x73,(byte)0x85,(byte)0x88,(byte)0x13,
+														(byte)0x44,(byte)0x10,(byte)0x32,(byte)0x54,(byte)0x76,(byte)0x98, //440123456789 address in semi octets (441032547698).
 														(byte)0x00,
 														(byte)0x00,
 	(byte)0x51,(byte)0xC9,(byte)0xE1,(byte)0x30,(byte)0x49,(byte)0xD4,(byte)0x81,(byte)0x70,(byte)0x39,(byte)0x1A,(byte)0xAD,(byte)0x06,(byte)0x83,(byte)0xD5,(byte)0x62,
@@ -60,7 +60,8 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 	(byte)0xD9,(byte)0x8C,(byte)0x56,(byte)0x83,(byte)0xC1,(byte)0x60,(byte)0x30,(byte)0x1A,(byte)0x4E,(byte)0x16,(byte)0x83,(byte)0xC1,(byte)0x62,(byte)0xA0,(byte)0xE6,
 	(byte)0x70,(byte)0xD8,(byte)0x74,(byte)0x0E,(byte)0x75,(byte)0x20,(byte)0x99,(byte)0x4D,(byte)0x06,(byte)0x93,(byte)0x81,(byte)0x50,(byte)0xD6,(byte)0x37,(byte)0x39,
 	(byte)0x6C,(byte)0x7E,(byte)0xBB,(byte)0xCB,(byte)0xA0,(byte)0x63,(byte)0x59,(byte)0xDE,(byte)0x0E,(byte)0xBB,(byte)0xF3,(byte)0x29};
-/* 447937588831 The phone number in semi octets (449773858813). */
+
+
 
 /*
 	// Constants to manage nibbles
