@@ -17,8 +17,6 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
     private ToolkitRegistry reg;
     private byte result;
 
-    public static final byte MY_INSTRUCTION= 	(byte)0x46;
-
     // Menu constants
     private static final byte[] menuEntry=     	{'I',' ','a','m',' ','a','l','i','v','e'};
     private byte[] item1 =        				{'S','e','n','d',' ','S','M','S'};
@@ -34,41 +32,31 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 	// TPDU buffer
 	private byte[] tpdu;
 
+	// Message buffer
+
+	private byte[] userData;
+	private byte[] userData_length;
+
     // SMS constants
-    private static final byte[] 	ALPHA_ID_MESSAGE =		{'H','e','l','l','o',' ',' ','W','o','r','l','d'}; // optional
+    private static final byte[] ALPHA_ID_MESSAGE =	{'S','e','n','d','i','n','g',' ','S','M','S','.','.','.'}; // optional
+    private static final byte[] mcc = 				{'M','C','C',':',' '};
+    private static final byte[] mnc = 				{' ','M','N','C',':',' '};
 
 
-/*
 	private static final byte[]		TPDU_BASE_1 =	{	(byte)0x01,
 														(byte)0xFF,
-														(byte)0x0C,
+														(byte)0x0C, //length of address
 														(byte)0x91,
 														(byte)0x44,(byte)0x10,(byte)0x32,(byte)0x54,(byte)0x76,(byte)0x98, //440123456789 The phone number in semi octets (441032547698).
 														(byte)0x00,
-														(byte)0x04};	
-*/																							
+														(byte)0x00};	
+	
 
-	private static final byte[]		HARDCODED_TPDU	= {	(byte)0x01,
-														(byte)0xFF,
-														(byte)0x0C, //length of address 
-														(byte)0x91,
-														(byte)0x44,(byte)0x10,(byte)0x32,(byte)0x54,(byte)0x76,(byte)0x98, //440123456789 address in semi octets (441032547698).
-														(byte)0x00,
-														(byte)0x00,
-	(byte)0x51,(byte)0xC9,(byte)0xE1,(byte)0x30,(byte)0x49,(byte)0xD4,(byte)0x81,(byte)0x70,(byte)0x39,(byte)0x1A,(byte)0xAD,(byte)0x06,(byte)0x83,(byte)0xD5,(byte)0x62,
-	(byte)0xB0,(byte)0xD8,(byte)0x0D,(byte)0x27,(byte)0x8B,(byte)0xC1,(byte)0x60,(byte)0xB1,(byte)0x19,(byte)0x28,(byte)0xD9,(byte)0x9C,(byte)0x26,(byte)0x75,(byte)0x20,
-	(byte)0xD9,(byte)0x8C,(byte)0x56,(byte)0x83,(byte)0xC1,(byte)0x60,(byte)0x30,(byte)0x1A,(byte)0x4E,(byte)0x16,(byte)0x83,(byte)0xC1,(byte)0x62,(byte)0xA0,(byte)0xE6,
-	(byte)0x70,(byte)0xD8,(byte)0x74,(byte)0x0E,(byte)0x75,(byte)0x20,(byte)0x99,(byte)0x4D,(byte)0x06,(byte)0x93,(byte)0x81,(byte)0x50,(byte)0xD6,(byte)0x37,(byte)0x39,
-	(byte)0x6C,(byte)0x7E,(byte)0xBB,(byte)0xCB,(byte)0xA0,(byte)0x63,(byte)0x59,(byte)0xDE,(byte)0x0E,(byte)0xBB,(byte)0xF3,(byte)0x29};
-
-
-
-/*
 	// Constants to manage nibbles
 	public static final byte NIBBLE_SIZE  = (byte)4;
  	public static final byte UPPER_NIBBLE  = (byte)0xF0;
  	public static final byte LOWER_NIBBLE  = (byte)0x0F; 
-*/
+
 
 
  	/**
@@ -81,16 +69,19 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
         itemId = reg.initMenuEntry(menuEntry, (short)0x0000, (short)menuEntry.length, 
                                    PRO_CMD_DISPLAY_TEXT, false, (byte) 0x00, (short) 0x0000);
 
+		//TO DO: send sms automatically when there is an update in the location status
+
         /* when the terminal enters the idle state with the result that either the Location status or Location
 		information has been changed or updated, the terminal shall inform the UICC*/
-		reg.setEvent(EVENT_EVENT_DOWNLOAD_LOCATION_STATUS);
+		//reg.setEvent(EVENT_EVENT_DOWNLOAD_LOCATION_STATUS);
 
-/*
+
 		// RAM allocated variables
 		locationInfo 		= JCSystem.makeTransientByteArray ((short)3, JCSystem.CLEAR_ON_RESET);
 		locationInfo_print 	= JCSystem.makeTransientByteArray ((short)6, JCSystem.CLEAR_ON_RESET);
-		tpdu  				= JCSystem.makeTransientByteArray ((short)19, JCSystem.CLEAR_ON_RESET);
-*/
+		tpdu  				= JCSystem.makeTransientByteArray ((short)28, JCSystem.CLEAR_ON_RESET);
+		userData			= JCSystem.makeTransientByteArray ((short)16, JCSystem.CLEAR_ON_RESET);
+		userData_length		= JCSystem.makeTransientByteArray ((short)1, JCSystem.CLEAR_ON_RESET);
 	}
 
 
@@ -140,7 +131,6 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
             switch (rspHdlr.getItemIdentifier()) {
                 case 1:
 
-/*
                 	// get locationInfo
 
 					// Command Qualifier 00 = Location Information
@@ -159,35 +149,40 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 					} 
 
 
-					
+					// change encoding to a readable one
 				    byteToASCII(locationInfo_print,locationInfo);
 
-			        Util.arrayCopy(TPDU_BASE_1, (short)0, tpdu, (short)0,(short) TPDU_BASE_1.length);
-			        tpdu[12]=(byte)(locationInfo_print.length & LOWER_NIBBLE);
-			        //Util.arrayCopy(locationInfo_length,(short)0,tpdu,(short)13,(short)locationInfo_length.length);
-			        Util.arrayCopy(locationInfo_print,(short)0,tpdu,(short)13,(short)locationInfo_print.length);
-			        
+					// build the message (use tpdu as buffer to safe resources)
+					Util.arrayCopy(mcc, (short)0, tpdu, (short)0, (short)mcc.length);
+					Util.arrayCopy(locationInfo_print,(short)0,tpdu,(short)mcc.length,(short)3);
+					Util.arrayCopy(mnc, (short)0, tpdu, (short)(mcc.length+3), (short)mnc.length);
+					Util.arrayCopy(locationInfo_print,(short)4,tpdu,(short)(mcc.length+3+mnc.length),(short)2);
 
-            		//packing not required
+					// change encoding to the gsm 7-bit default alphabet and pack the user data
+					ASCII_to_gsmA(tpdu,(short)userData.length,userData, userData_length);
+
+					// build the tpdu
+			        Util.arrayCopy(TPDU_BASE_1, (short)0, tpdu, (short)0,(short) TPDU_BASE_1.length);
+					//tpdu[12]=(byte)(userData_length[0]+1); //Length of user data
+					tpdu[12]=(byte)userData.length;
+			        Util.arrayCopy(userData,(short)0,tpdu,(short)(TPDU_BASE_1.length+1),(short)userData_length[0]); // user data
+
+
+
+            		// Send SMS, packing not required
             		proHdlr.init(PRO_CMD_SEND_SHORT_MESSAGE, (byte) 0, DEV_ID_NETWORK);
-            	  	proHdlr.appendTLV(TAG_ALPHA_IDENTIFIER, ALPHA_ID_MESSAGE, (short)0,(short)ALPHA_ID_MESSAGE.length);	
+					// Display ALPHA_ID_MESSAGE on screen, optional
+            	  	proHdlr.appendTLV(TAG_ALPHA_IDENTIFIER, ALPHA_ID_MESSAGE, (short)0,(short)ALPHA_ID_MESSAGE.length);
+					// SMS TPDU	
 					proHdlr.appendTLV((byte)TAG_SMS_TPDU, tpdu, (short)0,(short)tpdu.length);
 					proHdlr.send(); 
-
-*/
-
-             		proHdlr.init(PRO_CMD_SEND_SHORT_MESSAGE, (byte) 0, DEV_ID_NETWORK);
-            	  	proHdlr.appendTLV(TAG_ALPHA_IDENTIFIER, ALPHA_ID_MESSAGE, (short)0,(short)ALPHA_ID_MESSAGE.length);	
-					proHdlr.appendTLV((byte)TAG_SMS_TPDU, HARDCODED_TPDU, (short)0,(short)HARDCODED_TPDU.length);
-					proHdlr.send();
-
 
                 break;
             }
         }        
 	}	
 
-/*
+	// From nibbled hexadecimal to ASCII characters
 	private void byteToASCII(byte[] buffer, byte[] input) {
 
 		for (short i=(short)0x00 ; (i < (short)input.length) || (i < (short)((short)buffer.length/2)); i++) {
@@ -198,6 +193,28 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 		
 
 	}
-*/
 
+	// pack the sms user data with gsm 7-bit default alphabet			
+	private void ASCII_to_gsmA(byte[] input, short input_length, byte[] output){
+		short input_counter 	= 0;
+		short output_counter 	= 0;
+		short bit_count 		= 0;
+		short bit_queue 		= 0; 
+		while(input_counter<input_length){
+			bit_queue |= (input[input_counter] & 0x7F) << bit_count;
+			bit_count += 7;
+			if (bit_count >= 8){
+				output[output_counter]=(byte)(bit_queue & 0xFF);
+				output_counter++;
+				bit_count -= 8;
+				bit_queue >>=8;
+			}
+			input_counter++;
+		}
+		if (bit_count > 0){
+			output[output_counter]=(byte)(bit_queue & 0xFF);
+			output_counter++;
+		}
+	}
+	
 }

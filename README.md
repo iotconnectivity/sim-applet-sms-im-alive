@@ -12,16 +12,14 @@ JavaCard SIM card applet to deliver an SMS very the first time the SIM registers
 
 ## Description
 
-GSM SIM cards can realize about the status of network regitration (see ["Location Status" ETSII TS 102.223](https://www.etsi.org/deliver/etsi_ts/102200_102299/102223/12.01.00_60/ts_102223v120100p.pdf). What a SIM cannot realize is whether the data connection has been correctly acquired or not). This projects aim to deliver a "hello-im-alive" heart-beat-kind message to a remote server with the content of a Location Status message.
-
-This version sends a hardcoded sms to an example destination address. You should code the desired destination address following the instructions in the source code.
+This version sends a sms with location information (MCC MNC) to an example destination address. You should trigger the applet by selecting the SKT menu. You should code the desired destination address following the instructions in the source code.
 
 
 ## ToDo
 
-- to code the information in 7-bit GSM to be able to read it in the receiving mobile equipment.
-- Use the OPEN CHANNEL proactive command instead of sms
-- ...
+- Use the event "Download location status" send the sms only the first time the sim registers in a network.
+- Add more information to the sms. For example, IMEI of the device.
+- Asign an AID
 
 ## Installation
 
@@ -38,7 +36,10 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 Please note this source code has been released under the GPLv3 terms and all contributions will be considered. Have a look at the LICENSE file distributed with this code.
 
 
+## Standards
 
+[3GPP TS 23.038 Alphabets and language-specific information](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=745)
 
+[ETSI TS 102 223 Card Application Toolkit (CAT) ](https://www.etsi.org/deliver/etsi_ts/102200_102299/102223/14.00.00_60/ts_102223v140000p.pdf)
 
 
