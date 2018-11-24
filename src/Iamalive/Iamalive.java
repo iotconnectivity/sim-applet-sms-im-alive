@@ -50,7 +50,8 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 														(byte)0x44,(byte)0x10,(byte)0x32,(byte)0x54,(byte)0x76,(byte)0x98, //440123456789 The phone number in semi octets (441032547698).
 														(byte)0x00,
 														(byte)0x00};	
-	
+
+
 
 	// Constants to manage nibbles
 	public static final byte NIBBLE_SIZE  = (byte)4;
@@ -79,7 +80,7 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 		// RAM allocated variables
 		locationInfo 		= JCSystem.makeTransientByteArray ((short)3, JCSystem.CLEAR_ON_RESET);
 		locationInfo_print 	= JCSystem.makeTransientByteArray ((short)6, JCSystem.CLEAR_ON_RESET);
-		tpdu  				= JCSystem.makeTransientByteArray ((short)28, JCSystem.CLEAR_ON_RESET);
+		tpdu  				= JCSystem.makeTransientByteArray ((short)29, JCSystem.CLEAR_ON_RESET);
 		userData			= JCSystem.makeTransientByteArray ((short)16, JCSystem.CLEAR_ON_RESET);
 		userData_length		= JCSystem.makeTransientByteArray ((short)1, JCSystem.CLEAR_ON_RESET);
 	}
@@ -159,13 +160,13 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 					Util.arrayCopy(locationInfo_print,(short)4,tpdu,(short)(mcc.length+3+mnc.length),(short)2);
 
 					// change encoding to the gsm 7-bit default alphabet and pack the user data
-					ASCII_to_gsmA(tpdu,(short)userData.length,userData, userData_length);
+					ASCII_to_gsmA(tpdu,(short)userData.length,userData);
 
 					// build the tpdu
 			        Util.arrayCopy(TPDU_BASE_1, (short)0, tpdu, (short)0,(short) TPDU_BASE_1.length);
 					//tpdu[12]=(byte)(userData_length[0]+1); //Length of user data
 					tpdu[12]=(byte)userData.length;
-			        Util.arrayCopy(userData,(short)0,tpdu,(short)(TPDU_BASE_1.length+1),(short)userData_length[0]); // user data
+			        Util.arrayCopy(userData,(short)0,tpdu,(short)(TPDU_BASE_1.length+1),(short)userData.length); // user data
 
 
 
@@ -174,7 +175,7 @@ public class Iamalive extends Applet implements ToolkitInterface, ToolkitConstan
 					// Display ALPHA_ID_MESSAGE on screen, optional
             	  	proHdlr.appendTLV(TAG_ALPHA_IDENTIFIER, ALPHA_ID_MESSAGE, (short)0,(short)ALPHA_ID_MESSAGE.length);
 					// SMS TPDU	
-					proHdlr.appendTLV((byte)TAG_SMS_TPDU, tpdu, (short)0,(short)tpdu.length);
+					proHdlr.appendTLV((byte)TAG_SMS_TPDU, tpdu, (short)0,(short)(tpdu.length-1));
 					proHdlr.send(); 
 
                 break;
